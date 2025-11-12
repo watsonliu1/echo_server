@@ -1,38 +1,25 @@
-# 编译器与编译选项
-CC := gcc
-CXX := g++
-CFLAGS := -Wall -Wextra -O2 -std=c11  # C语言编译选项：开启警告、优化、C11标准
-CXXFLAGS := -Wall -Wextra -O2 -std=c++11  # C++编译选项：C++11标准
-LDFLAGS := -lpthread  # 链接线程库（客户端多线程需要）
+CXX = g++
+CXXFLAGS = -std=c++14 -Wall -O2 -pthread
+LDFLAGS = -pthread
 
-# 源文件与目标文件
-SERVER_SRC := echo_server.cpp  # 服务器源文件（假设为C++）
-CLIENT_SRC := echo_client.cpp  # 客户端源文件（假设为C++）
-SERVER_OBJ := $(SERVER_SRC:.cpp=.o)
-CLIENT_OBJ := $(CLIENT_SRC:.cpp=.o)
+SERVER_TARGET = echo_server
+CLIENT_TARGET = echo_client
 
-# 二进制文件名称
-SERVER_BIN := echo_server
-CLIENT_BIN := echo_client
+SERVER_OBJS = echo_server.o server_main.o
+CLIENT_OBJS = echo_client.o client_main.o
 
-# 默认目标：编译服务器和客户端
-all: $(SERVER_BIN) $(CLIENT_BIN)
+all: $(SERVER_TARGET) $(CLIENT_TARGET)
 
-# 编译服务器
-$(SERVER_BIN): $(SERVER_OBJ)
+$(SERVER_TARGET): $(SERVER_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-# 编译客户端
-$(CLIENT_BIN): $(CLIENT_OBJ)
+$(CLIENT_TARGET): $(CLIENT_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-# 生成目标文件（.o）
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# 清理目标文件和二进制文件
 clean:
-	rm -f $(SERVER_OBJ) $(CLIENT_OBJ) $(SERVER_BIN) $(CLIENT_BIN)
+	rm -f $(SERVER_TARGET) $(CLIENT_TARGET) $(SERVER_OBJS) $(CLIENT_OBJS)
 
-# 伪目标：避免与同名文件冲突
 .PHONY: all clean
