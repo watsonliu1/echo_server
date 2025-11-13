@@ -7,13 +7,15 @@
 #include <memory>                 // 用于智能指针（管理动态内存）
 #include <sys/epoll.h>            // 用于epoll事件驱动机制
 
-// 回声服务器类：实现基于epoll的高性能TCP服务器，接收客户端消息并回射
-class EchoServer {
+// 回射服务器类：实现基于epoll的高性能TCP服务器，接收客户端消息并回射
+class EchoServer
+{
 private:
     int server_fd;                  // 监听套接字文件描述符（用于接受新连接）
     int epoll_fd;                   // epoll句柄（用于管理IO事件）
     int port;                       // 服务器监听端口
     bool running;                   // 服务器运行状态标志（控制事件循环）
+    
     // 客户端缓冲区映射：key为客户端fd，value为该客户端的读写缓冲区（智能指针管理）
     std::unordered_map<int, std::unique_ptr<char[]>> client_buffers;
     std::mutex buffer_mutex;        // 保护client_buffers的互斥锁（多线程安全）
