@@ -1,40 +1,30 @@
-# 定义编译器（g++）
-CXX = g++
-# 编译选项：
-# -std=c++14：使用C++14标准
-# -Wall：开启所有警告
-# -O2：开启二级优化
-# -pthread：启用多线程支持
-CXXFLAGS = -std=c++14 -Wall -O2 -pthread
-# 链接选项：启用多线程支持
+CC = g++
+CFLAGS = -std=c++14 -Wall -O2 -pthread
 LDFLAGS = -pthread
 
-# 定义目标文件（服务器和客户端可执行文件）
-SERVER_TARGET = echo_server
-CLIENT_TARGET = echo_client
+# ========== 关键修改点 ==========
+# 1. server_global.o → server_stats.o（对应文件改名）
+# 2. performance_monitor.o → client_performance_monitor.o（可选，区分客户端监控）
+SERVER_OBJS = echo_server.o server_performance_monitor.o server_stats.o server_main.o
+CLIENT_OBJS = echo_client.o client_main.o client_performance_monitor.o
 
-# 定义服务器和客户端的目标文件（.o）
-SERVER_OBJS = echo_server.o server_main.o
-CLIENT_OBJS = echo_client.o client_main.o
+# 可执行文件
+TARGETS = echo_server echo_client
 
-# 默认目标：编译所有（服务器和客户端）
-all: $(SERVER_TARGET) $(CLIENT_TARGET)
+all: $(TARGETS)
 
-# 编译服务器可执行文件：依赖服务器目标文件
-$(SERVER_TARGET): $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)  # $@：目标文件，$^：所有依赖文件
+# 服务器编译
+echo_server: $(SERVER_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-# 编译客户端可执行文件：依赖客户端目标文件
-$(CLIENT_TARGET): $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+# 客户端编译
+echo_client: $(CLIENT_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-# 编译规则：将.cpp文件编译为.o目标文件
+# 通用编译规则（自动匹配.cpp生成.o）
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@  # $<：第一个依赖文件（.cpp），$@：目标文件（.o）
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# 清理目标：删除可执行文件和目标文件
+# 清理：新增可能的改名文件（如server_stats.o、client_performance_monitor.o）
 clean:
-	rm -f $(SERVER_TARGET) $(CLIENT_TARGET) $(SERVER_OBJS) $(CLIENT_OBJS)
-
-# 声明伪目标（避免与同名文件冲突）
-.PHONY: all clean
+	rm -f $(SERVER_OBJS) $(CLIENT_OBJS) $(TARGETS) *.log server_global.o performance_monitor.o
