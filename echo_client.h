@@ -26,10 +26,10 @@ public:
 
 private:
   void worker_thread(int thread_id);
-  int connect_to_server(int thread_id); // 添加 thread_id 参数
+  int connect_to_server(int thread_id);
   int set_nonblock(int fd);
-  bool send_message(int fd, const std::string &msg);
-  bool recv_message(int fd);
+  bool send_message(int fd, const std::string &msg, int thread_id);
+  bool recv_message(int fd, int thread_id);
 
 private:
   std::string server_ip_;

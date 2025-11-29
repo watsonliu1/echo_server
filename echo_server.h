@@ -29,8 +29,8 @@ private:
   int set_nonblock(int fd);
   void handle_events();
   void handle_accept();
-  void handle_read(int fd);
-  void handle_write(int fd);
+  void handle_read(int fd, ConnContext *ctx);  // 新增重载
+  void handle_write(int fd, ConnContext *ctx); // 新增重载
   void parse_message(ConnContext *ctx);
   void process_echo(const std::string &msg, int fd);
 
@@ -38,6 +38,7 @@ private:
   int mod_epoll_event(int fd, uint32_t events);
   int del_epoll_event(int fd);
   void close_conn(int fd);
+  void clear_conn_context(ConnContext *ctx);
 
 private:
   uint16_t port_;

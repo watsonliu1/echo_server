@@ -15,7 +15,7 @@ struct MessageHeader {
 } __attribute__((packed));
 
 // 公共常量
-constexpr size_t MAX_EVENTS = 1024;
+constexpr size_t MAX_EVENTS = 10240;
 constexpr size_t BUFFER_SIZE = 8192;
 
 // 错误码

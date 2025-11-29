@@ -45,7 +45,7 @@ void PerformanceMonitor::monitor_loop() {
     uint64_t current_messages = total_messages_;
     double tps = (current_messages - last_message_count_) / elapsed;
 
-    // 采集CPU和内存
+    // 采集CPU和内存（修复：获取实时内存）
     double cpu_usage;
     uint64_t memory_rss;
     collect_cpu_memory(cpu_usage, memory_rss);
@@ -65,7 +65,8 @@ void PerformanceMonitor::monitor_loop() {
              std::to_string(cpu_usage) +
              "%, "
              "内存占用=" +
-             std::to_string(memory_rss / 1024) + "MB");
+             std::to_string(memory_rss / 1024 / 1024) + "MB" // 转换为MB
+    );
 
     last_time_ = now;
     last_message_count_ = current_messages;
@@ -74,10 +75,17 @@ void PerformanceMonitor::monitor_loop() {
 
 void PerformanceMonitor::collect_cpu_memory(double &cpu_usage,
                                             uint64_t &memory_rss) {
-  // 获取内存使用（RSS）
-  struct rusage usage;
-  getrusage(RUSAGE_SELF, &usage);
-  memory_rss = usage.ru_maxrss * 1024; // 转换为字节
+  // ===== 修复：获取当前内存占用（非峰值）=====
+  std::ifstream statm("/proc/self/statm");
+  std::string line;
+  if (statm.is_open() && std::getline(statm, line)) {
+    std::istringstream iss(line);
+    uint64_t size, resident;
+    iss >> size >> resident;
+    memory_rss = resident * sysconf(_SC_PAGESIZE); // 当前RSS（字节）
+  } else {
+    memory_rss = 0;
+  }
 
   // 获取CPU使用率
   static uint64_t last_cpu_time = 0;
